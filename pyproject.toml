@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "ndjson>=0.3.1",
+    "pyobjc>=12.1",
+    "python-daemon>=3.1.2",
+]
+
+[dependency-groups]
+dev = [
+    "pyobjc>=12.1",
+    "ty>=0.0.17",
+]
