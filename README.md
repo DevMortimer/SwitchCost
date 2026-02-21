@@ -5,6 +5,7 @@ Track time spent per application on macOS.
 ## Usage
 
 ```bash
+uv sync
 ./build.sh           # Build binary
 ./dist/SwitchCost    # Run (Ctrl+C to exit)
 ./dist/SwitchCost status  # Show stats

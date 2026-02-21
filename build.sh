@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-pip install pyinstaller
+export PYTHONPATH=$PWD
+export PATH=$PWD/.venv/bin:$PATH
 
 pyinstaller --onefile --name SwitchCost main.py
 
