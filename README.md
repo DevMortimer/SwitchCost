@@ -2,6 +2,8 @@
 
 Track time spent per application on macOS.
 
+![](./assets/screenshot.png)
+
 ## Usage
 
 ```bash

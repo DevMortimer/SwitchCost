@@ -157,14 +157,14 @@ if __name__ == "__main__":
         a = sys.argv[1]
         if a == "status":
             show_stats()
-            exit(0)
+            sys.exit(0)
         elif a == "exit":
             print("Sending exit signal...")
             os.kill(os.getpid(), signal.SIGTERM)
-            exit(0)
+            sys.exit(0)
         else:
             print(f"Unknown command: {a}")
             print(f"Usage: python main.py [status|exit]")
-            exit(1)
+            sys.exit(1)
 
     main()

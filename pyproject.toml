@@ -1,6 +1,6 @@
 [project]
 name = "switchcost"
-version = "0.1.0"
+version = "0.1.1"
 description = "An offline tool that measures how much time you lose to context switching—no advice, just awareness."
 readme = "README.md"
 requires-python = ">=3.12"
