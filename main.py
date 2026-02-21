@@ -74,56 +74,62 @@ def main() -> None:
     run_main_loop()
 
 
-def show_help():
-    print(
-        f"\033[1m{bcolors.OKBLUE}SwitchCost{bcolors.ENDC}\n\t\033[1m{bcolors.OKGREEN}help{bcolors.ENDC} - Show this help\n\t\033[1m{bcolors.OKGREEN}status{bcolors.ENDC} - show the current run\n\t{bcolors.WARNING}exit{bcolors.ENDC} - ends the daemon\n"
-    )
+def show_stats():
+    filepath = "/tmp/SwitchCost/events.ndjson"
+    try:
+        with open(filepath, "r") as f:
+            events = list(ndjson.reader(f))
+    except FileNotFoundError:
+        print("No events recorded yet")
+        return
+
+    if not events:
+        print("No events recorded yet")
+        return
+
+    totals = {}
+    for event in events:
+        prog = event.get("to", "Unknown")
+        dur_str = event.get("duration", "0")
+        try:
+            if dur_str == "0":
+                continue
+            parts = dur_str.split(":")
+            if len(parts) == 3:
+                h, m, s = parts
+                seconds = int(h) * 3600 + int(m) * 60 + float(s)
+            else:
+                seconds = float(dur_str)
+        except (ValueError, AttributeError):
+            seconds = 0
+        totals[prog] = totals.get(prog, 0) + seconds
+
+    if not totals:
+        print("No duration data")
+        return
+
+    print(f"\n{bcolors.OKBLUE}Time per program:{bcolors.ENDC}")
+    for prog, secs in sorted(totals.items(), key=lambda x: x[1], reverse=True):
+        h = int(secs // 3600)
+        m = int((secs % 3600) // 60)
+        s = int(secs % 60)
+        print(f"  {prog}: {h}h {m}m {s}s")
+    print(f"\nTotal switches: {len(events)}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         a = sys.argv[1]
-        if a == "help":
-            show_help()
-            exit(0)  # exit early
-        elif a == "status":
-            # get the current PID
-            PID = ""
-            try:
-                with open("/tmp/SwitchCost/SwitchCost.pid", "r") as file:
-                    PID = file.read().strip()
-            except FileNotFoundError as e:
-                print("no running daemon")
-                exit(0)
-            # resolve if the PID is running
-            try:
-                os.kill(int(PID), 0)
-            except OSError:
-                print("no running daemon")
-                exit(0)
-            else:
-                print("running")
-                exit(0)
+        if a == "status":
+            show_stats()
+            exit(0)
         elif a == "exit":
-            # get the current PID
-            PID = ""
-            try:
-                with open("/tmp/SwitchCost/SwitchCost.pid", "r") as file:
-                    PID = file.read().strip()
-            except FileNotFoundError as e:
-                print("no running daemon; can't exit anything")
-                exit(0)
-            else:
-                try:
-                    os.kill(int(PID), 15)
-                    print("exited successfully")
-                    exit(0)
-                except OSError:
-                    print("no running daemon; can't exit anything")
-                    exit(1)
+            print("Sending exit signal...")
+            os.kill(os.getpid(), signal.SIGTERM)
+            exit(0)
         else:
-            print(f"Unknown command: {a}\n")
-            show_help()
+            print(f"Unknown command: {a}")
+            print(f"Usage: python main.py [status|exit]")
             exit(1)
 
     main()

@@ -1,13 +1,12 @@
 [project]
 name = "switchcost"
 version = "0.1.0"
-description = "Add your description here"
+description = "An offline tool that measures how much time you lose to context switching—no advice, just awareness."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ndjson>=0.3.1",
     "pyobjc>=12.1",
-    "python-daemon>=3.1.2",
 ]
 
 [dependency-groups]
