@@ -1,4 +1,4 @@
-import os, time, signal, logging, sys, datetime, ndjson
+import os, time, signal, logging, sys, datetime, ndjson, atexit
 import tracker
 from logging.handlers import RotatingFileHandler
 
@@ -64,14 +64,49 @@ def run_main_loop():
     logging.info("Cleanup done. Exiting.")
 
 
+def check_already_running():
+    pidfile = "/tmp/SwitchCost/SwitchCost.pid"
+    try:
+        with open(pidfile, "r") as f:
+            pid = int(f.read().strip())
+        os.kill(pid, 0)
+        return True
+    except (FileNotFoundError, ValueError, OSError):
+        pass
+    return False
+
+
+def write_pid():
+    pidfile = "/tmp/SwitchCost/SwitchCost.pid"
+    with open(pidfile, "w") as f:
+        f.write(str(os.getpid()))
+
+
+def remove_pid():
+    pidfile = "/tmp/SwitchCost/SwitchCost.pid"
+    try:
+        os.remove(pidfile)
+    except FileNotFoundError:
+        pass
+
+
 def main() -> None:
     os.makedirs("/tmp/SwitchCost", exist_ok=True)
 
+    if check_already_running():
+        print("SwitchCost is already running")
+        sys.exit(1)
+
+    write_pid()
+    atexit.register(remove_pid)
+
     setup_logging("/tmp/SwitchCost/SwitchCost.log", also_console=True)
     signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGHUP, handle_exit)
     logging.info("Running in FOREGROUND mode.")
     run_main_loop()
+    remove_pid()
 
 
 def show_stats():
